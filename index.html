@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contrato de Marcenaria</title>
+  <style>
+    :root {
+      --bg: #f4f7f5;
+      --panel: #ffffff;
+      --text: #1c2430;
+      --accent: #0f766e;
+      --accent-strong: #0b5a54;
+      --border: #d5dde6;
+      --muted: #5d6977;
+      --input-bg: #f9fbfd;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top right, #d8eee9, transparent 45%),
+        radial-gradient(circle at bottom left, #d8e8f5, transparent 40%),
+        var(--bg);
+    }
+
+    .page {
+      width: min(1160px, 100%);
+      margin: 0 auto;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 12px 28px rgba(13, 38, 59, 0.1);
+    }
+
+    .form-panel {
+      position: sticky;
+      top: 14px;
+    }
+
+    h1 {
+      margin-top: 0;
+      margin-bottom: 14px;
+      font-size: 1.25rem;
+      line-height: 1.25;
+    }
+
+    form {
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      font-size: 0.94rem;
+      font-weight: 700;
+      color: #263241;
+      margin-top: 2px;
+    }
+
+    input, textarea, select, button {
+      width: 100%;
+      border: 1px solid #c5d0dc;
+      border-radius: 12px;
+      padding: 12px 13px;
+      font: inherit;
+    }
+
+    input, textarea, select {
+      background: var(--input-bg);
+      color: var(--text);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.16);
+      background-color: #fff;
+    }
+
+    textarea { min-height: 96px; resize: vertical; }
+
+    button {
+      border: 0;
+      margin-top: 6px;
+      min-height: 48px;
+      background: linear-gradient(140deg, var(--accent), var(--accent-strong));
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.2px;
+      box-shadow: 0 8px 20px rgba(11, 90, 84, 0.28);
+    }
+
+    button:hover {
+      filter: brightness(1.04);
+    }
+
+    .actions-grid {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .btn-secondary {
+      background: #e7eef6;
+      color: #1f2d3d;
+      box-shadow: none;
+      border: 1px solid #c5d0dc;
+    }
+
+    .saved-wrapper {
+      margin-top: 6px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      background: #fbfdff;
+    }
+
+    .saved-list {
+      margin-top: 8px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .saved-empty {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .saved-item {
+      border: 1px solid #d7e0ea;
+      border-radius: 10px;
+      padding: 8px;
+      background: #fff;
+    }
+
+    .saved-title {
+      margin: 0 0 6px;
+      font-size: 0.9rem;
+      color: #223041;
+    }
+
+    .saved-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .saved-actions button {
+      min-height: 38px;
+      margin-top: 0;
+      font-size: 0.9rem;
+      padding: 8px 10px;
+    }
+
+    .contract {
+      line-height: 1.6;
+      white-space: pre-line;
+      overflow-wrap: break-word;
+      word-break: normal;
+      font-size: 0.99rem;
+    }
+
+    .contract-header {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #d5dde6;
+    }
+
+    .title {
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+    }
+
+    .clause-title {
+      font-weight: 700;
+      margin-top: 16px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      break-after: avoid-page;
+      page-break-after: avoid;
+    }
+
+    .clause {
+      break-inside: avoid;
+      page-break-inside: avoid;
+      margin-bottom: 10px;
+    }
+
+    .dynamic {
+      color: #000;
+      font-weight: 400;
+    }
+
+    .line {
+      width: min(360px, 86%);
+      margin: 0 auto 8px;
+      border-top: 1px solid #555;
+    }
+
+    .signature-block {
+      margin: 20px auto 0;
+      max-width: 520px;
+      text-align: center;
+      break-inside: avoid;
+      page-break-inside: avoid;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .signature-label {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .anexo-imagem-box {
+      margin-top: 8px;
+      border: 1px solid #cfd8e2;
+      border-radius: 8px;
+      padding: 8px;
+      max-width: 360px;
+      background: #fff;
+    }
+
+    .anexo-imagem {
+      display: block;
+      max-width: 100%;
+      max-height: 260px;
+      object-fit: contain;
+    }
+
+    .anexo-imagem-vazio {
+      margin: 0;
+      color: #5d6977;
+      font-size: 0.92rem;
+    }
+
+    @media (max-width: 900px) {
+      .page {
+        grid-template-columns: 1fr;
+        gap: 14px;
+        padding: 12px;
+      }
+
+      .form-panel {
+        position: static;
+      }
+
+      .contract-panel {
+        order: 2;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        background:
+          radial-gradient(circle at top right, #e7f5f0, transparent 55%),
+          var(--bg);
+      }
+
+      .page {
+        padding: 10px;
+      }
+
+      .panel {
+        border-radius: 14px;
+        padding: 14px;
+        box-shadow: 0 8px 22px rgba(13, 38, 59, 0.08);
+      }
+
+      form {
+        gap: 10px;
+      }
+
+      h1 {
+        font-size: 1.12rem;
+        margin-bottom: 10px;
+      }
+
+      label {
+        font-size: 0.9rem;
+      }
+
+      input, textarea, select {
+        font-size: 16px;
+        padding: 11px 12px;
+      }
+
+      button {
+        min-height: 50px;
+      }
+
+      .actions-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .saved-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .contract {
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+
+      .contract-header {
+        justify-content: center;
+        margin-bottom: 10px;
+        padding-bottom: 6px;
+      }
+
+      .title {
+        font-size: 1rem;
+        margin-bottom: 14px;
+      }
+
+      .clause-title {
+        margin-top: 12px;
+        margin-bottom: 6px;
+        font-size: 0.92rem;
+      }
+
+      .signature-block {
+        margin-top: 14px;
+        max-width: 100%;
+      }
+
+      .line {
+        width: 100%;
+      }
+
+      .signature-label {
+        font-size: 0.9rem;
+      }
+
+      .anexo-imagem-box {
+        max-width: 100%;
+      }
+
+    }
+
+    @media (max-width: 480px) {
+      .page {
+        padding: 8px;
+        gap: 10px;
+      }
+
+      .panel {
+        padding: 12px;
+        border-radius: 12px;
+      }
+
+      label {
+        font-size: 0.86rem;
+      }
+
+      input, textarea, select, button {
+        border-radius: 10px;
+      }
+
+      .saved-wrapper {
+        padding: 8px;
+      }
+
+      .saved-title {
+        font-size: 0.85rem;
+      }
+
+      .contract {
+        font-size: 0.92rem;
+      }
+
+    }
+
+    @media print {
+      @page {
+        size: 210mm 297mm;
+        margin: 32mm 20mm 24mm 20mm;
+      }
+
+      body {
+        background: #fff;
+        font-family: "Times New Roman", Times, serif;
+      }
+      .form-panel { display: none; }
+      .page { width: auto; margin: 0; display: block; }
+      .panel { border: 0; box-shadow: none; border-radius: 0; padding: 0; }
+      .contract {
+        line-height: 1.32;
+        font-size: 11pt;
+        text-align: justify;
+      }
+
+      .contract-header {
+        position: fixed;
+        top: 1mm;
+        left: 20mm;
+        right: 1mm;
+        bottom: auto;
+        margin: 0;
+        width: auto;
+        padding-bottom: 0;
+        border-bottom: 0;
+        justify-content: flex-end;
+        z-index: 10;
+      }
+
+      .clause {
+        orphans: 3;
+        widows: 3;
+      }
+      .anexo-imagem-box {
+        max-width: 300px;
+      }
+      .anexo-imagem {
+        max-height: 180px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="panel form-panel">
+      <h1>Preencher Contrato</h1>
+      <form id="contractForm">
+        <label for="nomeContratante">Cláusula 1ª - Nome do contratante</label>
+        <input id="nomeContratante" name="nomeContratante" type="text" placeholder="Nome completo">
+
+        <label for="nacionalidadeContratante">Cláusula 1ª - Nacionalidade</label>
+        <input id="nacionalidadeContratante" name="nacionalidadeContratante" type="text" placeholder="Ex.: brasileiro(a)">
+
+        <label for="estadoCivilContratante">Cláusula 1ª - Estado civil</label>
+        <input id="estadoCivilContratante" name="estadoCivilContratante" type="text" placeholder="Ex.: divorciado(a)">
+
+        <label for="cpfContratante">Cláusula 1ª - CPF</label>
+        <input id="cpfContratante" name="cpfContratante" type="text" placeholder="000.000.000-00">
+
+        <label for="enderecoContratante">Cláusula 1ª - Endereço</label>
+        <input id="enderecoContratante" name="enderecoContratante" type="text" placeholder="Rua/Avenida e detalhes">
+
+        <label for="bairroContratante">Cláusula 1ª - Bairro</label>
+        <input id="bairroContratante" name="bairroContratante" type="text" placeholder="Bairro">
+
+        <label for="telefoneContratante">Cláusula 1ª - Telefone</label>
+        <input id="telefoneContratante" name="telefoneContratante" type="text" placeholder="(00) 00000-0000">
+
+        <label for="emailContratante">Cláusula 1ª - E-mail</label>
+        <input id="emailContratante" name="emailContratante" type="email" placeholder="email@dominio.com">
+
+        <label for="objeto">Cláusula 2ª - Objeto</label>
+        <textarea id="objeto" name="objeto" placeholder="Descreva o serviço que irá ser prestado"></textarea>
+
+        <label for="prazo">Cláusula 3ª - Prazo (dias)</label>
+        <input id="prazo" name="prazo" type="number" min="1" step="1" placeholder="Ex.: 30">
+
+        <label for="valorTotal">Cláusula 4ª - Valor total (R$)</label>
+        <input id="valorTotal" name="valorTotal" type="text" placeholder="Ex.: 5.500,00">
+
+        <label for="valorTotalExtenso">Cláusula 4ª - Valor total por extenso</label>
+        <input id="valorTotalExtenso" name="valorTotalExtenso" type="text" placeholder="Ex.: cinco mil e quinhentos reais">
+
+        <label for="pagamento">Cláusula 4ª - Forma de pagamento</label>
+        <textarea id="pagamento" name="pagamento" placeholder="Descreva livremente a forma de pagamento"></textarea>
+
+        <label for="dia">Dia</label>
+        <select id="dia" name="dia">
+          <option value="">Selecione o dia</option>
+        </select>
+
+        <label for="mes">Mês</label>
+        <select id="mes" name="mes">
+          <option value="">Selecione o mês</option>
+          <option value="janeiro">janeiro</option>
+          <option value="fevereiro">fevereiro</option>
+          <option value="março">março</option>
+          <option value="abril">abril</option>
+          <option value="maio">maio</option>
+          <option value="junho">junho</option>
+          <option value="julho">julho</option>
+          <option value="agosto">agosto</option>
+          <option value="setembro">setembro</option>
+          <option value="outubro">outubro</option>
+          <option value="novembro">novembro</option>
+          <option value="dezembro">dezembro</option>
+        </select>
+
+        <label for="ano">Ano</label>
+        <select id="ano" name="ano">
+          <option value="">Selecione o ano</option>
+        </select>
+
+        <label for="anexos">Cláusula 11ª - Anexos</label>
+        <textarea id="anexos" name="anexos" placeholder="Ex.: projeto executivo, memorial descritivo, imagens e medidas"></textarea>
+
+        <label for="anexoImagem">Cláusula 11ª - Imagem anexa</label>
+        <input id="anexoImagem" name="anexoImagem" type="file" accept="image/*">
+
+        <button type="button" id="printButton">Imprimir / Salvar PDF</button>
+        <div class="actions-grid">
+          <button type="button" id="saveDraftButton" class="btn-secondary">Salvar preenchimento</button>
+          <button type="button" id="clearFormButton" class="btn-secondary">Limpar formulário</button>
+        </div>
+        <div class="saved-wrapper">
+          <strong>Últimos 10 preenchimentos</strong>
+          <div id="savedList" class="saved-list"></div>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel contract-panel">
+      <article class="contract">
+        <div class="contract-header">
+        </div>
+        <div class="title"> CONTRATO DE PRESTAÇÃO DE SERVIÇOS IMPÉRIO PLANEJADOS</div>
+
+        <section class="clause">
+          <div class="clause-title">CLÁUSULA 1ª – IDENTIFICAÇÃO DAS PARTES</div>
+
+          <strong>CONTRATANTE:</strong>
+
+          <span class="dynamic nomeContratante">preencher nome</span>, <span class="dynamic nacionalidadeContratante">preencher nacionalidade</span>, <span class="dynamic estadoCivilContratante">preencher estado civil</span>, inscrito(a) no CPF sob o nº <span class="dynamic cpfContratante">preencher CPF</span>, residente na <span class="dynamic enderecoContratante">preencher endereço</span>, bairro <span class="dynamic bairroContratante">preencher bairro</span>, telefone nº <span class="dynamic telefoneContratante">preencher telefone</span> e endereço eletrônico: <span class="dynamic emailContratante">preencher e-mail</span>.
+
+          <strong>CONTRATADO 1:</strong>
+
+          Marcenaria Império Móveis Planejados, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº 62-887.486/0001-89, com sede na Rua Cipó, nº 95, Bairro Morumbi, Uberlândia/MG, CEP 38407-237, telefone nº (34) 99154-6313 e endereço eletrônico: Imperioplanejadosudio@gmail.com.
+        </section>
+
+        <section class="clause">
+          <div class="clause-title">CLÁUSULA 2ª – OBJETO</div>
+          <span class="dynamic objeto">Precisa ser preenchida</span>
+        </section>
+
+        <section class="clause">
+          <div class="clause-title">CLÁUSULA 3ª – PRAZO</div>
+          O presente contrato terá o prazo de <span class="dynamic prazo">___</span> dias,
+          a partir da assinatura do contrato.
+        </section>
+
+        <section class="clause">
+          <div class="clause-title">CLÁUSULA 4ª – VALOR E CONDIÇÕES DE PAGAMENTO</div>
+          O valor total ajustado é de R$ <span class="dynamic valorTotal">___</span> (<span class="dynamic valorTotalExtenso">preencher valor por extenso</span>).
+          Forma de pagamento: <span class="dynamic pagamento">Precisa ser preenchida</span>.
+          O CONTRATADO poderá solicitar valores antecipados ou complementares sempre que forem necessários para aquisição de materiais, ferragens, acessórios, insumos, contratação de terceiros ou finalização de etapas do serviço. A continuidade da execução poderá ficar condicionada ao pagamento desses valores, desde que previamente informados ao CONTRATANTE.
+        </section>
+
+        <section class="clause">
+          <div class="clause-title">CLÁUSULA 5ª – ALTERAÇÃO DE ESCOPO</div>
+
+          Qualquer alteração de medida, material, acabamento, ferragem ou desenho inicialmente aprovado
+          deverá ser formalizada por aditivo contratual, com eventual revisão de valores e prazo.
+          Não havendo aditivo assinado, prevalece o escopo originalmente contratado.
+        </section>
+
+        <section class="clause">
+          <div class="clause-title">CLÁUSULA 6ª – OBRIGAÇÕES DAS PARTES</div>
+
+          Do CONTRATADO(A): Executar os serviços conforme combinado, garantir qualidade, cumprir prazos, utilizar materiais de qualidade e responder por vícios ou defeitos de fabricação.
+
+          Do CONTRATANTE: Fornecer acesso ao local, aprovar o projeto, pagar conforme acordado e comunicar problemas imediatamente.
+        </section>
+
+        <section class="clause">
+          <div class="clause-title">CLÁUSULA 7ª – GARANTIA</div>
+
+          O serviço possui garantia legal de 90 dias, conforme o Código de Defesa do Consumidor (CDC), contra defeitos de fabricação.
+          A garantia não cobre danos por mau uso, umidade excessiva, infiltrações, intervenção de terceiros ou desgaste natural.
+        </section>
+
+        <section class="clause">
+          <div class="clause-title">CLÁUSULA 8ª – INADIMPLÊNCIA</div>
+
+          Em caso de atraso de pagamento, incidirá multa de 2% sobre o valor em atraso, além de juros de 1% ao mês, calculados pro rata die.
+          O atraso superior a 15 dias autoriza a suspensão dos serviços até a regularização.
+        </section>
+
+        <section class="clause">
+          <div class="clause-title">CLÁUSULA 9ª – RESCISÃO</div>
+
+          O presente contrato poderá ser rescindido em caso de descumprimento de qualquer obrigação assumida pelas partes, especialmente por atraso de pagamento, recusa injustificada de recebimento, impedimento de acesso ao local de instalação, solicitação de alterações não aprovadas por escrito ou ausência de informações necessárias à execução dos serviços.
+          Caso a rescisão ocorra por iniciativa ou culpa do CONTRATANTE, este deverá pagar ao CONTRATADO os valores correspondentes aos serviços já executados, materiais adquiridos, peças produzidas, despesas comprovadas e demais custos assumidos até a data da rescisão, além de multa equivalente a 10% do valor total do contrato, sem prejuízo de perdas e danos.
+          Os valores já pagos pelo CONTRATANTE poderão ser retidos ou compensados pelo CONTRATADO para quitação dos custos, materiais, mão de obra e prejuízos decorrentes da rescisão.
+        </section>
+
+        <section class="clause">
+          <div class="clause-title">CLÁUSULA 10ª – ACEITE DE ENTREGA</div>
+
+          A entrega dos serviços será formalizada por termo de aceite assinado pelo CONTRATANTE.
+          Eventuais ressalvas deverão ser registradas no ato da entrega para correção no prazo acordado entre as partes.
+        </section>
+
+        <section class="clause">
+          <div class="clause-title">CLÁUSULA 11ª – ANEXOS</div>
+
+          Poderão integrar este contrato, para todos os fins de direito, os seguintes anexos: Documento de Identificação,
+          Cronograma de Serviços, Proposta Comercial e Projetos de Arquitetura.
+          Anexos informados: <span class="dynamic anexos">Sem anexos informados.</span>
+          <div class="anexo-imagem-box">
+            <img id="anexoImagemPreview" class="anexo-imagem" alt="Imagem anexa do contrato" style="display: none;">
+            <p id="anexoImagemVazio" class="anexo-imagem-vazio">Nenhuma imagem anexa enviada.</p>
+          </div>
+        </section>
+
+        <section class="clause">
+          <div class="clause-title">CLÁUSULA 12ª – ASSINATURA ELETRÔNICA</div>
+
+          As partes concordam com a assinatura eletrônica deste instrumento, quando utilizada, reconhecendo sua validade jurídica, integridade e autenticidade.
+          Para fins de prova, poderão ser utilizados registros de data, hora e demais evidências técnicas da assinatura.
+        </section>
+
+        <section class="clause">
+          <div class="clause-title">CLÁUSULA 13ª – FORO</div>
+
+          Fica eleito o foro da Comarca de Uberlândia/MG, com endereço na Avenida Rondon Pacheco,
+          Nº 6130, como competente para dirimir quaisquer dúvidas ou controvérsias oriundas deste contrato, renunciando as partes a qualquer outro, por mais privilegiado que seja.
+        </section>
+
+
+        <section class="clause">
+          Uberlândia, <span class="dynamic dia">preenchida</span> de <span class="dynamic mes">preenchida</span> de <span class="dynamic ano">preenchida</span>.
+        </section>
+
+
+        <div class="signature-block">
+          <div class="line"></div>
+          <strong class="signature-label">CONTRATANTE:</strong>
+          <div><span class="dynamic nomeContratante">preencher nome</span> CPF nº <span class="dynamic cpfContratante">preencher CPF</span></div>
+        </div>
+
+
+        <div class="signature-block">
+          <div class="line"></div>
+          <strong class="signature-label">CONTRATADO 1:</strong>
+          <div>Marcenaria Império Móveis Planejados CNPJ nº 62-887.486/0001-89</div>
+        </div>
+
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById("contractForm");
+    const printButton = document.getElementById("printButton");
+    const saveDraftButton = document.getElementById("saveDraftButton");
+    const clearFormButton = document.getElementById("clearFormButton");
+    const savedList = document.getElementById("savedList");
+    const anexoImagemInput = document.getElementById("anexoImagem");
+    const anexoImagemPreview = document.getElementById("anexoImagemPreview");
+    const anexoImagemVazio = document.getElementById("anexoImagemVazio");
+    const STORAGE_KEY = "contrato_marcenaria_ultimos_10";
+    const MAX_SAVED = 10;
+    let anexoImagemDataUrl = "";
+
+    const defaults = {
+      nomeContratante: "preencher nome",
+      nacionalidadeContratante: "preencher nacionalidade",
+      estadoCivilContratante: "preencher estado civil",
+      cpfContratante: "preencher CPF",
+      enderecoContratante: "preencher endereço",
+      bairroContratante: "preencher bairro",
+      telefoneContratante: "preencher telefone",
+      emailContratante: "preencher e-mail",
+      objeto: "Precisa ser preenchida",
+      prazo: "___",
+      valorTotal: "___",
+      valorTotalExtenso: "preencher valor por extenso",
+      pagamento: "Precisa ser preenchida",
+      dia: "preenchida",
+      mes: "preenchida",
+      ano: "preenchida",
+      anexos: "Sem anexos informados."
+    };
+
+    function updateField(name, value) {
+      const elements = document.querySelectorAll("." + name);
+      const text = value.trim() || defaults[name];
+      elements.forEach(function (el) {
+        el.textContent = text;
+      });
+    }
+
+    function setAnexoImagem(dataUrl) {
+      anexoImagemDataUrl = dataUrl || "";
+      if (anexoImagemDataUrl) {
+        anexoImagemPreview.src = anexoImagemDataUrl;
+        anexoImagemPreview.style.display = "block";
+        anexoImagemVazio.style.display = "none";
+      } else {
+        anexoImagemPreview.removeAttribute("src");
+        anexoImagemPreview.style.display = "none";
+        anexoImagemVazio.style.display = "block";
+      }
+    }
+
+    function getFormData() {
+      const data = {};
+      Object.keys(defaults).forEach(function (name) {
+        const field = form.elements.namedItem(name);
+        if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement || field instanceof HTMLSelectElement) {
+          data[name] = field.value;
+        }
+      });
+      data.anexoImagemDataUrl = anexoImagemDataUrl;
+      return data;
+    }
+
+    function applyFormData(data) {
+      Object.keys(defaults).forEach(function (name) {
+        const field = form.elements.namedItem(name);
+        if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement || field instanceof HTMLSelectElement) {
+          field.value = data[name] || "";
+          updateField(name, field.value);
+        }
+      });
+      setAnexoImagem(data.anexoImagemDataUrl || "");
+      if (anexoImagemInput instanceof HTMLInputElement) {
+        anexoImagemInput.value = "";
+      }
+    }
+
+    function readSavedItems() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          return [];
+        }
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (_error) {
+        return [];
+      }
+    }
+
+    function writeSavedItems(items) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items.slice(0, MAX_SAVED)));
+    }
+
+    function formatSavedDate(isoDate) {
+      const date = new Date(isoDate);
+      return date.toLocaleString("pt-BR");
+    }
+
+    function renderSavedList() {
+      const items = readSavedItems();
+      savedList.innerHTML = "";
+
+      if (items.length === 0) {
+        const emptyText = document.createElement("p");
+        emptyText.className = "saved-empty";
+        emptyText.textContent = "Nenhum preenchimento salvo ainda.";
+        savedList.appendChild(emptyText);
+        return;
+      }
+
+      items.forEach(function (item) {
+        const card = document.createElement("div");
+        card.className = "saved-item";
+
+        const title = document.createElement("p");
+        title.className = "saved-title";
+        const nome = (item.data && item.data.nomeContratante) ? item.data.nomeContratante : "Sem nome";
+        title.textContent = nome + " - " + formatSavedDate(item.savedAt);
+
+        const actions = document.createElement("div");
+        actions.className = "saved-actions";
+
+        const loadButton = document.createElement("button");
+        loadButton.type = "button";
+        loadButton.className = "btn-secondary";
+        loadButton.textContent = "Carregar";
+        loadButton.addEventListener("click", function () {
+          applyFormData(item.data || {});
+        });
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "btn-secondary";
+        deleteButton.textContent = "Excluir";
+        deleteButton.addEventListener("click", function () {
+          const nextItems = readSavedItems().filter(function (saved) {
+            return saved.id !== item.id;
+          });
+          writeSavedItems(nextItems);
+          renderSavedList();
+        });
+
+        actions.appendChild(loadButton);
+        actions.appendChild(deleteButton);
+        card.appendChild(title);
+        card.appendChild(actions);
+        savedList.appendChild(card);
+      });
+    }
+
+    function populateDateSelects() {
+      const daySelect = document.getElementById("dia");
+      const yearSelect = document.getElementById("ano");
+      const currentYear = new Date().getFullYear();
+
+      for (let day = 1; day <= 31; day += 1) {
+        const option = document.createElement("option");
+        option.value = String(day);
+        option.textContent = String(day);
+        daySelect.appendChild(option);
+      }
+
+      for (let year = currentYear - 5; year <= currentYear + 10; year += 1) {
+        const option = document.createElement("option");
+        option.value = String(year);
+        option.textContent = String(year);
+        yearSelect.appendChild(option);
+      }
+    }
+
+    populateDateSelects();
+
+    anexoImagemInput.addEventListener("change", function () {
+      const file = anexoImagemInput.files && anexoImagemInput.files[0];
+      if (!file) {
+        setAnexoImagem("");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function () {
+        setAnexoImagem(typeof reader.result === "string" ? reader.result : "");
+      };
+      reader.onerror = function () {
+        setAnexoImagem("");
+        alert("Não foi possível carregar a imagem.");
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function syncContractField(event) {
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement)) {
+        return;
+      }
+      if (!defaults[target.name]) {
+        return;
+      }
+      updateField(target.name, target.value);
+    }
+
+    form.addEventListener("input", syncContractField);
+    form.addEventListener("change", syncContractField);
+
+    Object.keys(defaults).forEach(function (name) {
+      const field = form.elements.namedItem(name);
+      if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement || field instanceof HTMLSelectElement) {
+        updateField(name, field.value || defaults[name]);
+      }
+    });
+
+    printButton.addEventListener("click", function () {
+      window.print();
+    });
+
+    saveDraftButton.addEventListener("click", function () {
+      const data = getFormData();
+      const hasAnyValue = Object.values(data).some(function (value) {
+        return String(value || "").trim() !== "";
+      });
+
+      if (!hasAnyValue) {
+        alert("Preencha pelo menos um campo antes de salvar.");
+        return;
+      }
+
+      const items = readSavedItems();
+      const newItem = {
+        id: String(Date.now()),
+        savedAt: new Date().toISOString(),
+        data: data
+      };
+
+      items.unshift(newItem);
+      writeSavedItems(items);
+      renderSavedList();
+      alert("Preenchimento salvo com sucesso.");
+    });
+
+    clearFormButton.addEventListener("click", function () {
+      applyFormData({});
+    });
+
+    setAnexoImagem("");
+    renderSavedList();
+  </script>
+</body>
+</html>
