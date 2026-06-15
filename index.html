@@ -186,6 +186,11 @@
       border-bottom: 1px solid #d5dde6;
     }
 
+    .contract-logo {
+      max-height: 84px;
+      margin-right: 12px;
+    }
+
     .title {
       text-align: center;
       font-weight: 700;
@@ -394,6 +399,36 @@
 
     }
 
+    /* Progress bar */
+    .progress-wrapper { margin-bottom: 12px; }
+    .progress-label {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .progress-bar-bg {
+      height: 6px;
+      background: #dde4ec;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+      border-radius: 10px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Validação */
+    .field-error {
+      border-color: #e53e3e !important;
+      box-shadow: 0 0 0 3px rgba(229,62,62,0.18) !important;
+      background-color: #fff5f5 !important;
+    }
+
     @media print {
       @page {
         size: 210mm 297mm;
@@ -414,17 +449,12 @@
       }
 
       .contract-header {
-        position: fixed;
-        top: 1mm;
-        left: 20mm;
-        right: 1mm;
-        bottom: auto;
-        margin: 0;
+        position: static;
+        margin: 0 0 8mm 0;
         width: auto;
-        padding-bottom: 0;
-        border-bottom: 0;
+        padding-bottom: 4mm;
+        border-bottom: 0.5pt solid #d5dde6;
         justify-content: flex-end;
-        z-index: 10;
       }
 
       .clause {
@@ -444,6 +474,15 @@
   <main class="page">
     <section class="panel form-panel">
       <h1>Preencher Contrato</h1>
+      <div class="progress-wrapper">
+        <div class="progress-label">
+          <span>Progresso</span>
+          <span id="progressText">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div id="progressBarFill" class="progress-bar-fill"></div>
+        </div>
+      </div>
       <form id="contractForm">
         <label for="nomeContratante">Cláusula 1ª - Nome do contratante</label>
         <input id="nomeContratante" name="nomeContratante" type="text" placeholder="Nome completo">
@@ -532,6 +571,7 @@
     <section class="panel contract-panel">
       <article class="contract">
         <div class="contract-header">
+          <img src="imperio.png" alt="Logo Império" class="contract-logo">
         </div>
         <div class="title"> CONTRATO DE PRESTAÇÃO DE SERVIÇOS IMPÉRIO PLANEJADOS</div>
 
@@ -692,12 +732,152 @@
       anexos: "Sem anexos informados."
     };
 
+    // ── 1. Máscaras ──────────────────────────────────────────────────────────
+    const MASKED_FIELDS = new Set(["cpfContratante", "telefoneContratante", "valorTotal"]);
+
+    function maskCPF(value) {
+      const d = value.replace(/\D/g, "").slice(0, 11);
+      if (d.length <= 3) return d;
+      if (d.length <= 6) return d.slice(0, 3) + "." + d.slice(3);
+      if (d.length <= 9) return d.slice(0, 3) + "." + d.slice(3, 6) + "." + d.slice(6);
+      return d.slice(0, 3) + "." + d.slice(3, 6) + "." + d.slice(6, 9) + "-" + d.slice(9);
+    }
+
+    function maskTelefone(value) {
+      const d = value.replace(/\D/g, "").slice(0, 11);
+      if (d.length <= 2) return d.length ? "(" + d : "";
+      const ddd = d.slice(0, 2);
+      const rest = d.slice(2);
+      if (rest.length === 0) return "(" + ddd + ") ";
+      if (d.length <= 10) {
+        if (rest.length <= 4) return "(" + ddd + ") " + rest;
+        return "(" + ddd + ") " + rest.slice(0, 4) + "-" + rest.slice(4);
+      }
+      if (rest.length <= 5) return "(" + ddd + ") " + rest;
+      return "(" + ddd + ") " + rest.slice(0, 5) + "-" + rest.slice(5);
+    }
+
+    function maskValor(value) {
+      const parts = value.split(",");
+      let intPart = parts[0].replace(/\D/g, "");
+      const decPart = parts.length > 1 ? parts[1].replace(/\D/g, "").slice(0, 2) : null;
+      intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      return decPart !== null ? intPart + "," + decPart : intPart;
+    }
+
+    function registerMaskListener(id, maskFn) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener("input", function () {
+        const masked = maskFn(el.value);
+        el.value = masked;
+        el.classList.remove("field-error");
+        updateField(el.name, masked);
+        updateProgress();
+      });
+    }
+
+    registerMaskListener("cpfContratante", maskCPF);
+    registerMaskListener("telefoneContratante", maskTelefone);
+    registerMaskListener("valorTotal", maskValor);
+
+    // ── 2. Indicador de progresso ────────────────────────────────────────────
+    const ALL_PROGRESS_FIELDS = [
+      "nomeContratante", "nacionalidadeContratante", "estadoCivilContratante",
+      "cpfContratante", "enderecoContratante", "bairroContratante",
+      "telefoneContratante", "emailContratante", "objeto", "prazo",
+      "valorTotal", "valorTotalExtenso", "pagamento", "dia", "mes", "ano"
+    ];
+
+    function updateProgress() {
+      const filled = ALL_PROGRESS_FIELDS.filter(function (name) {
+        const field = form.elements.namedItem(name);
+        return field && field.value.trim() !== "";
+      }).length;
+      const pct = Math.round((filled / ALL_PROGRESS_FIELDS.length) * 100);
+      const fill = document.getElementById("progressBarFill");
+      const text = document.getElementById("progressText");
+      if (fill) fill.style.width = pct + "%";
+      if (text) text.textContent = pct + "%";
+    }
+
+    // ── 3. Validação antes de imprimir ───────────────────────────────────────
+    const REQUIRED_FIELDS = [
+      { id: "nomeContratante",    label: "Nome do contratante" },
+      { id: "cpfContratante",     label: "CPF" },
+      { id: "enderecoContratante",label: "Endereço" },
+      { id: "bairroContratante",  label: "Bairro" },
+      { id: "telefoneContratante",label: "Telefone" },
+      { id: "objeto",             label: "Objeto (Cláusula 2ª)" },
+      { id: "prazo",              label: "Prazo (Cláusula 3ª)" },
+      { id: "valorTotal",         label: "Valor total" },
+      { id: "pagamento",          label: "Forma de pagamento" },
+      { id: "dia",                label: "Dia" }
+    ];
+
+    function validateRequiredFields() {
+      const missing = [];
+      REQUIRED_FIELDS.forEach(function (f) {
+        const el = document.getElementById(f.id);
+        if (!el || el.value.trim() === "") {
+          if (el) el.classList.add("field-error");
+          missing.push(f.label);
+        } else {
+          if (el) el.classList.remove("field-error");
+        }
+      });
+      return missing;
+    }
+
+    // ── 4 + 5. Estimativa de páginas e otimização de fonte ───────────────────
+    function estimateAndOptimize(contractEl) {
+      const MM_TO_PX = 96 / 25.4;
+      const usableH = (297 - 13 * 2) * MM_TO_PX;
+      const origStyle = contractEl.getAttribute("style") || "";
+
+      contractEl.style.fontFamily = '"Times New Roman", Times, serif';
+      contractEl.style.lineHeight = "1.2";
+      contractEl.style.fontSize = "11pt";
+
+      let finalFontSize = 11;
+      while (contractEl.scrollHeight > usableH * 2 && finalFontSize > 9.0) {
+        finalFontSize = Math.round((finalFontSize - 0.2) * 10) / 10;
+        contractEl.style.fontSize = finalFontSize + "pt";
+      }
+
+      const pages = Math.ceil(contractEl.scrollHeight / usableH);
+      contractEl.setAttribute("style", origStyle);
+      return { pages: pages, finalFontSize: finalFontSize };
+    }
+
+    // ── 6. CSS de impressão dinâmico (inclui numeração de páginas) ───────────
+    function injectPrintStyle(fontSize) {
+      const style = document.createElement("style");
+      style.id = "__dynamicPrint";
+      style.textContent = [
+        "@media print {",
+        "  @page {",
+        "    size: 210mm 297mm;",
+        "    margin: 32mm 20mm 24mm 20mm;",
+        "    @bottom-center {",
+        '      content: "Página " counter(page) " de " counter(pages);',
+        '      font-size: 9pt;',
+        '      font-family: "Times New Roman", Times, serif;',
+        '      color: #555;',
+        "    }",
+        "  }",
+        "  .contract { font-size: " + fontSize + "pt !important; }",
+        "}"
+      ].join("\n");
+      document.head.appendChild(style);
+      return style;
+    }
+
+    // ── Funções base ─────────────────────────────────────────────────────────
     function updateField(name, value) {
       const elements = document.querySelectorAll("." + name);
       const text = value.trim() || defaults[name];
-      elements.forEach(function (el) {
-        el.textContent = text;
-      });
+      elements.forEach(function (el) { el.textContent = text; });
     }
 
     function setAnexoImagem(dataUrl) {
@@ -737,14 +917,13 @@
       if (anexoImagemInput instanceof HTMLInputElement) {
         anexoImagemInput.value = "";
       }
+      updateProgress();
     }
 
     function readSavedItems() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) {
-          return [];
-        }
+        if (!raw) return [];
         const parsed = JSON.parse(raw);
         return Array.isArray(parsed) ? parsed : [];
       } catch (_error) {
@@ -757,10 +936,10 @@
     }
 
     function formatSavedDate(isoDate) {
-      const date = new Date(isoDate);
-      return date.toLocaleString("pt-BR");
+      return new Date(isoDate).toLocaleString("pt-BR");
     }
 
+    // ── 8. renderSavedList com label personalizado ───────────────────────────
     function renderSavedList() {
       const items = readSavedItems();
       savedList.innerHTML = "";
@@ -779,8 +958,8 @@
 
         const title = document.createElement("p");
         title.className = "saved-title";
-        const nome = (item.data && item.data.nomeContratante) ? item.data.nomeContratante : "Sem nome";
-        title.textContent = nome + " - " + formatSavedDate(item.savedAt);
+        const displayName = item.label || (item.data && item.data.nomeContratante) || "Sem nome";
+        title.textContent = displayName + " - " + formatSavedDate(item.savedAt);
 
         const actions = document.createElement("div");
         actions.className = "saved-actions";
@@ -789,18 +968,14 @@
         loadButton.type = "button";
         loadButton.className = "btn-secondary";
         loadButton.textContent = "Carregar";
-        loadButton.addEventListener("click", function () {
-          applyFormData(item.data || {});
-        });
+        loadButton.addEventListener("click", function () { applyFormData(item.data || {}); });
 
         const deleteButton = document.createElement("button");
         deleteButton.type = "button";
         deleteButton.className = "btn-secondary";
         deleteButton.textContent = "Excluir";
         deleteButton.addEventListener("click", function () {
-          const nextItems = readSavedItems().filter(function (saved) {
-            return saved.id !== item.id;
-          });
+          const nextItems = readSavedItems().filter(function (saved) { return saved.id !== item.id; });
           writeSavedItems(nextItems);
           renderSavedList();
         });
@@ -837,11 +1012,7 @@
 
     anexoImagemInput.addEventListener("change", function () {
       const file = anexoImagemInput.files && anexoImagemInput.files[0];
-      if (!file) {
-        setAnexoImagem("");
-        return;
-      }
-
+      if (!file) { setAnexoImagem(""); return; }
       const reader = new FileReader();
       reader.onload = function () {
         setAnexoImagem(typeof reader.result === "string" ? reader.result : "");
@@ -853,19 +1024,19 @@
       reader.readAsDataURL(file);
     });
 
+    // syncContractField pula MASKED_FIELDS (já têm listener próprio na fase target)
     function syncContractField(event) {
       const target = event.target;
-      if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement)) {
-        return;
-      }
-      if (!defaults[target.name]) {
-        return;
-      }
+      if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement)) return;
+      if (!defaults[target.name]) return;
+      if (MASKED_FIELDS.has(target.name)) return;
+      target.classList.remove("field-error");
       updateField(target.name, target.value);
+      updateProgress();
     }
 
     form.addEventListener("input", syncContractField);
-    form.addEventListener("change", syncContractField);
+    form.addEventListener("change", function (e) { syncContractField(e); updateProgress(); });
 
     Object.keys(defaults).forEach(function (name) {
       const field = form.elements.namedItem(name);
@@ -874,10 +1045,45 @@
       }
     });
 
+    updateProgress();
+
+    // ── printButton com validação + estimativa + CSS dinâmico ────────────────
     printButton.addEventListener("click", function () {
+      const missing = validateRequiredFields();
+      if (missing.length > 0) {
+        alert("Preencha os campos obrigatórios antes de imprimir:\n\n• " + missing.join("\n• "));
+        const firstMissing = REQUIRED_FIELDS.find(function (f) {
+          const el = document.getElementById(f.id);
+          return el && el.value.trim() === "";
+        });
+        if (firstMissing) {
+          const el = document.getElementById(firstMissing.id);
+          el.scrollIntoView({ behavior: "smooth" });
+          el.focus();
+        }
+        return;
+      }
+
+      const contractEl = document.querySelector(".contract");
+      const result = estimateAndOptimize(contractEl);
+
+      const confirmed = window.confirm(
+        "O contrato tem aproximadamente " + result.pages + " página(s).\n\nDeseja continuar com a impressão?"
+      );
+      if (!confirmed) return;
+
+      injectPrintStyle(result.finalFontSize);
+
+      window.addEventListener("afterprint", function cleanup() {
+        window.removeEventListener("afterprint", cleanup);
+        const dynStyle = document.getElementById("__dynamicPrint");
+        if (dynStyle) dynStyle.parentNode.removeChild(dynStyle);
+      });
+
       window.print();
     });
 
+    // ── 8. saveDraftButton com nome personalizado via prompt ─────────────────
     saveDraftButton.addEventListener("click", function () {
       const data = getFormData();
       const hasAnyValue = Object.values(data).some(function (value) {
@@ -889,10 +1095,15 @@
         return;
       }
 
+      const defaultName = data.nomeContratante || "Sem nome";
+      const label = window.prompt("Nome do rascunho:", defaultName);
+      if (label === null) return;
+
       const items = readSavedItems();
       const newItem = {
         id: String(Date.now()),
         savedAt: new Date().toISOString(),
+        label: label.trim() || defaultName,
         data: data
       };
 
@@ -902,9 +1113,7 @@
       alert("Preenchimento salvo com sucesso.");
     });
 
-    clearFormButton.addEventListener("click", function () {
-      applyFormData({});
-    });
+    clearFormButton.addEventListener("click", function () { applyFormData({}); });
 
     setAnexoImagem("");
     renderSavedList();
